@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <link rel="stylesheet" href="assets/welcome.css">
+    <style>
+        button {
+    width: 10%;
+    padding: 16px;
+    background: linear-gradient(to right, #ff6ec7, #ff7a5c);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+    margin-top: 20px;
+}
+
+button:hover {
+    background: linear-gradient(to right, #ff7a5c, #ff6ec7);
+    transform: scale(1.05); 
+}
+
+    </style>
+</head>
+<body>
+    <h1>Welcome user</h1>
+    <button onclick="window.location.href='/logout'">Logout</button>
+</body>
+</html>
