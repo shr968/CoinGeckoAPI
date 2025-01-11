@@ -98,7 +98,7 @@ app.post('/signup', encoder, function (req, res) {
         res.send("Passwords do not match.");
     }
 });
-app.get('/forgot-password', isAuthenticated, (req, res) => {
+app.get('/forgot-password', (req, res) => {
     res.sendFile(__dirname + '/forgot-password.html');
 });
 app.post('/forgot-password', encoder, (req, res) => {
