@@ -7,25 +7,31 @@
     <link rel="stylesheet" href="assets/welcome.css">
     <style>
         button {
-    width: 10%;
-    padding: 16px;
-    background: linear-gradient(to right, #ff6ec7, #ff7a5c);
-    border: none;
-    border-radius: 10px;
-    color: white;
-    font-size: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-    margin-top: 20px;
-}
+            width: 10%;
+            padding: 16px;
+            background: linear-gradient(to right, #ff6ec7, #ff7a5c);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+            margin-top: 20px;
+        }
 
-button:hover {
-    background: linear-gradient(to right, #ff7a5c, #ff6ec7);
-    transform: scale(1.05); 
-}
+        button:hover {
+            background: linear-gradient(to right, #ff7a5c, #ff6ec7);
+            transform: scale(1.05);
+        }
 
+        /* Media Query for mobile devices */
+        @media (max-width: 600px) {
+            button {
+                width: 50%;  /* Increase the width of the button on small screens */
+            }
+        }
     </style>
 </head>
 <body>
