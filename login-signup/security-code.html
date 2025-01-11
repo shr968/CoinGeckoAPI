@@ -15,5 +15,16 @@
         <input type="text" name="email" />
         <input type="submit" value="Submit" />
     </form>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const errorMessage = urlParams.get('error');
+        const successMessage = urlParams.get('success');
+        if (errorMessage) {
+            alert(decodeURIComponent(errorMessage)); 
+        }
+        if (successMessage) {
+            alert(decodeURIComponent(successMessage)); 
+        }
+    </script>
 </body>
 </html>

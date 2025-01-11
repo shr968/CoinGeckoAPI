@@ -2,7 +2,7 @@ const mysql = require('mysql');
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require("body-parser");
-const session=require('express-session')
+const session = require('express-session');
 const bcrypt = require('bcryptjs');  
 const encoder = bodyParser.urlencoded();
 const app = express();
@@ -38,7 +38,7 @@ app.post("/", encoder, function (req, res) {
     connection.query("SELECT * FROM loginuser WHERE user_name = ?", [username], function (error, results) {
         if (error) {
             console.log(error);
-            res.redirect("/");
+            res.redirect("/?error=An%20error%20occurred");
             return;
         }
         if (results.length > 0) {
@@ -48,14 +48,15 @@ app.post("/", encoder, function (req, res) {
                     req.session.user = { username: username };
                     res.redirect("/welcome"); 
                 } else {
-                    res.send("Invalid credentials.");
+                    res.redirect("/?error=Invalid%20credentials");
                 }
             });
         } else {
-            res.send("User not found.");
+            res.redirect("/?error=User%20not%20found");
         }
     });
 });
+
 function isAuthenticated(req, res, next) {
     if (req.session.user) {
         return next();
@@ -71,6 +72,7 @@ app.get("/welcome", isAuthenticated, function (req, res) {
 app.get("/signup", function (req, res) {
     res.sendFile(__dirname + "/signup.html");
 });
+
 app.post('/signup', encoder, function (req, res) {
     var fullname = req.body.fullname;
     var username = req.body.username;
@@ -78,15 +80,15 @@ app.post('/signup', encoder, function (req, res) {
     var confirmPassword = req.body.confirm_password;
     var code = req.body.sec_code;
     if (password === confirmPassword) {
-        connection.query("SELECT * FROM loginuser WHERE user_name = ?", [username], function (error, results, fields) {
+        connection.query("SELECT * FROM loginuser WHERE user_name = ?", [username], function (error, results) {
             if (results.length > 0) {
-                res.send("User already exists, please login.");
+                res.redirect("/signup?error=User%20already%20exists,%20please%20login");
             } else {
                 bcrypt.hash(password, 10, function (err, hashedPassword) {
                     if (err) throw err;
-                    connection.query("INSERT INTO loginuser (user_name, user_pass, sec_code) VALUES (?, ?, ?)", [username, hashedPassword, code], function (error, results, fields) {
+                    connection.query("INSERT INTO loginuser (user_name, user_pass, sec_code) VALUES (?, ?, ?)", [username, hashedPassword, code], function (error, results) {
                         if (error) {
-                            res.send("Error while signing up.");
+                            res.redirect("/signup?error=Error%20while%20signing%20up");
                         } else {
                             res.redirect("/"); 
                         }
@@ -95,57 +97,63 @@ app.post('/signup', encoder, function (req, res) {
             }
         });
     } else {
-        res.send("Passwords do not match.");
+        res.redirect("/signup?error=Passwords%20do%20not%20match");
     }
 });
+
 app.get('/forgot-password', (req, res) => {
     res.sendFile(__dirname + '/forgot-password.html');
 });
+
 app.post('/forgot-password', encoder, (req, res) => {
     const email = req.body.email;
-    connection.query("SELECT * FROM loginuser WHERE user_name = ?", [email], function (error, results, fields) {
+    connection.query("SELECT * FROM loginuser WHERE user_name = ?", [email], function (error, results) {
         if (error) {
             console.log(error);
-            res.send("An error occurred.");
+            res.redirect("/forgot-password?error=An%20error%20occurred");
             return;
         }
         if (results.length > 0) {
             res.redirect('/sec-code?email=' + email); 
         } else {
-            res.send("Email not found.");
+            res.redirect("/forgot-password?error=Email%20not%20found");
         }
     });
 });
-app.get('/sec-code',(req, res) => {
+
+app.get('/sec-code', (req, res) => {
     const email = req.query.email;
     res.sendFile(__dirname + '/security-code.html');
 });
+
 app.post('/sec-code', encoder, (req, res) => {
     const enteredCode = req.body.security;
-const email = req.body.email;
-connection.query('SELECT * FROM loginuser WHERE user_name = ?', [email], (err, results) => {
-    if (err) {
-        console.error(err);
-        return res.send("An error occurred.");
-    }
-
-    if (results.length > 0) {
-        const storedCode = results[0].sec_code;
-
-        if (enteredCode === storedCode) {
-            res.redirect('/reset-password?email=' + email);
-        } else {
-            res.redirect('/forgot-password');
+    const email = req.body.email;
+    connection.query('SELECT * FROM loginuser WHERE user_name = ?', [email], (err, results) => {
+        if (err) {
+            console.error(err);
+            return res.redirect("/sec-code?error=An%20error%20occurred");
         }
-    } else {
-        res.send("Email not found.");
-    }
+
+        if (results.length > 0) {
+            const storedCode = results[0].sec_code;
+
+            if (enteredCode === storedCode) {
+                res.redirect('/reset-password?email=' + email);
+            } else {
+                res.redirect('/sec-code?error=Invalid%20security%20code');
+            }
+        } else {
+            res.redirect("/sec-code?error=Email%20not%20found");
+        }
+    });
 });
-});
+
 app.get('/reset-password', (req, res) => {
     const email = req.query.email;
     res.sendFile(__dirname + '/reset-password.html');
 });
+
 app.post('/reset-password', encoder, (req, res) => {
     const newPassword = req.body.password;
     const email = req.body.email;
@@ -154,13 +162,14 @@ app.post('/reset-password', encoder, (req, res) => {
         if (err) throw err;
         connection.query("UPDATE loginuser SET user_pass = ? WHERE user_name = ?", [hashedPassword, email], function (error, results) {
             if (error) {
-                res.send("Error while resetting password.");
+                res.redirect("/reset-password?error=Error%20while%20resetting%20password");
             } else {
-                res.send("Password reset successfully.");
+                res.redirect("/reset-password?success=Password%20reset%20successfully");
             }
         });
     });
 });
+
 app.get("/logout", function (req, res) {
     req.session.destroy((err) => {
         if (err) {
