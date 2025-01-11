@@ -116,7 +116,7 @@ app.post('/forgot-password', encoder, (req, res) => {
         }
     });
 });
-app.get('/sec-code', isAuthenticated, (req, res) => {
+app.get('/sec-code',(req, res) => {
     const email = req.query.email;
     res.sendFile(__dirname + '/security-code.html');
 });
@@ -142,7 +142,7 @@ connection.query('SELECT * FROM loginuser WHERE user_name = ?', [email], (err, r
     }
 });
 });
-app.get('/reset-password', isAuthenticated, (req, res) => {
+app.get('/reset-password', (req, res) => {
     const email = req.query.email;
     res.sendFile(__dirname + '/reset-password.html');
 });
