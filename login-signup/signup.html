@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up UI</title>
-    <link rel="stylesheet" href="assets/styles2.css">    
+    <link rel="stylesheet" href="assets/styles2.css">
 </head>
 <body>
     <section class="box">
@@ -17,11 +17,21 @@
         <div class="form">
             <h2>Create Account</h2>
             <form action="/signup" method="POST">
-                <input type="text" name="fullname" class="input-field" placeholder="Full Name" required />
-                <input type="email" name="username" class="input-field" placeholder="Email" required />
-                <input type="password" name="password" class="input-field" placeholder="Password" required />
-                <input type="password" name="confirm_password" class="input-field" placeholder="Confirm Password" required />
-                <input type="text" name="sec_code" class="input-field" placeholder="Enter a 6 digit Security Code" required maxlength="6" pattern="\d{6}" />
+                <div class="input-row">
+                    <input type="text" name="fullname" class="input-field" placeholder="Full Name" required />
+                    <input type="email" name="username" class="input-field" placeholder="Email" required />
+                </div>
+                <div class="input-row">
+                    <input type="password" name="password" class="input-field" placeholder="Password" required />
+                    <input type="password" name="confirm_password" class="input-field" placeholder="Confirm Password" required />
+                </div>
+                <div class="input-row">
+                    <input type="text" name="sec_code" class="input-field" placeholder="Enter a 6-digit Security Code" required maxlength="6" pattern="\d{6}" />
+                    <input type="text" name="cryptos" class="input-field" placeholder="Cryptos (comma-separated, e.g., BTC, ETH)" required />
+                </div>
+                <div class="input-row">
+                    <input type="number" name="change_percent" class="input-field" placeholder="Alert at % change (e.g., 5)" required step="0.1" />
+                </div>
                 <input type="submit" class="btn" value="SIGN UP">
             </form>
             <br>

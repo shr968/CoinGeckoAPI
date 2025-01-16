@@ -1,18 +1,24 @@
-const mysql = require('mysql');
 require('dotenv').config();
+const mysql = require('mysql');
 const express = require('express');
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
 const session = require('express-session');
-const bcrypt = require('bcryptjs');  
+const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
+const axios = require('axios');
+const cron = require('node-cron');
 const encoder = bodyParser.urlencoded();
 const app = express();
+const CURRENCY = 'usd';
+let lastPrice = null;
+
 app.use("/assets", express.static("assets"));
 
 app.use(session({
     secret: 'your_secret_key',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false } 
+    cookie: { secure: false }
 }));
 
 const connection = mysql.createConnection({
@@ -28,13 +34,23 @@ connection.connect(function (error) {
     else console.log('Connected to the database successfully!!');
 });
 
-app.get("/", function (req, res) {
-    res.sendFile(__dirname + "/index.html");
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'shreyanayakb26@gmail.com', 
+        pass: 'kmsi xckb wxdl cery'
+    }
 });
 
-app.post("/", encoder, function (req, res) {
-    var username = req.body.username;
-    var password = req.body.password;
+app.get("/", function (req, res) {
+    res.sendFile(__dirname + "/main.html");
+});
+app.get("/index",function(req,res){
+    res.sendFile(__dirname+'/index.html');
+})
+app.post("/index", encoder, function (req, res) {
+    const username = req.body.username;
+    const password = req.body.password;
     connection.query("SELECT * FROM loginuser WHERE user_name = ?", [username], function (error, results) {
         if (error) {
             console.log(error);
@@ -46,7 +62,7 @@ app.post("/", encoder, function (req, res) {
                 if (err) throw err;
                 if (isMatch) {
                     req.session.user = { username: username };
-                    res.redirect("/welcome"); 
+                    res.redirect("/welcome");
                 } else {
                     res.redirect("/?error=Invalid%20credentials");
                 }
@@ -65,8 +81,8 @@ function isAuthenticated(req, res, next) {
     }
 }
 
-app.get("/welcome", isAuthenticated, function (req, res) {
-    res.sendFile(__dirname + "/welcome.html");
+app.get('/welcome', isAuthenticated, (req, res) => {
+    res.sendFile(__dirname + '/welcome.html');
 });
 
 app.get("/signup", function (req, res) {
@@ -74,11 +90,14 @@ app.get("/signup", function (req, res) {
 });
 
 app.post('/signup', encoder, function (req, res) {
-    var fullname = req.body.fullname;
-    var username = req.body.username;
-    var password = req.body.password;
-    var confirmPassword = req.body.confirm_password;
-    var code = req.body.sec_code;
+    const fullname = req.body.fullname;
+    const username = req.body.username;
+    const password = req.body.password;
+    const confirmPassword = req.body.confirm_password;
+    const code = req.body.sec_code;
+    const cryptos = req.body.cryptos;
+    const changePercent = parseFloat(req.body.change_percent);
+
     if (password === confirmPassword) {
         connection.query("SELECT * FROM loginuser WHERE user_name = ?", [username], function (error, results) {
             if (results.length > 0) {
@@ -86,13 +105,17 @@ app.post('/signup', encoder, function (req, res) {
             } else {
                 bcrypt.hash(password, 10, function (err, hashedPassword) {
                     if (err) throw err;
-                    connection.query("INSERT INTO loginuser (user_name, user_pass, sec_code) VALUES (?, ?, ?)", [username, hashedPassword, code], function (error, results) {
-                        if (error) {
-                            res.redirect("/signup?error=Error%20while%20signing%20up");
-                        } else {
-                            res.redirect("/"); 
+                    connection.query(
+                        "INSERT INTO loginuser (user_name, user_pass, sec_code, cryptos, change_percent) VALUES (?, ?, ?, ?, ?)",
+                        [username, hashedPassword, code, cryptos, changePercent],
+                        function (error, results) {
+                            if (error) {
+                                res.redirect("/signup?error=Error%20while%20signing%20up");
+                            } else {
+                                res.redirect("/");
+                            }
                         }
-                    });
+                    );
                 });
             }
         });
@@ -101,86 +124,96 @@ app.post('/signup', encoder, function (req, res) {
     }
 });
 
-app.get('/forgot-password', (req, res) => {
-    res.sendFile(__dirname + '/forgot-password.html');
-});
+cron.schedule('*/1 * * * *', async () => {
+    console.log('Cron job executed at: ' + new Date().toLocaleString());
 
-app.post('/forgot-password', encoder, (req, res) => {
-    const email = req.body.email;
-    connection.query("SELECT * FROM loginuser WHERE user_name = ?", [email], function (error, results) {
-        if (error) {
-            console.log(error);
-            res.redirect("/forgot-password?error=An%20error%20occurred");
-            return;
-        }
-        if (results.length > 0) {
-            res.redirect('/sec-code?email=' + email); 
-        } else {
-            res.redirect("/forgot-password?error=Email%20not%20found");
-        }
-    });
-});
+    connection.query("SELECT * FROM loginuser", async (error, users) => {
+        if (error) return console.error(error);
 
-app.get('/sec-code', (req, res) => {
-    const email = req.query.email;
-    res.sendFile(__dirname + '/security-code.html');
-});
+        for (const user of users) {
+            const cryptos = user.cryptos.split(',').map(crypto => crypto.trim().toUpperCase());
+            const threshold = user.change_percent;
+            const email = user.user_name;
+            const fetchCryptoPrice = async () => {
+                try {
+                    const response = await axios.get(`https://api.coingecko.com/api/v3/simple/price`, {
+                        params: {
+                            ids: cryptos.join(','),
+                            vs_currencies: CURRENCY,
+                        },
+                    });
 
-app.post('/sec-code', encoder, (req, res) => {
-    const enteredCode = req.body.security;
-    const email = req.body.email;
-    connection.query('SELECT * FROM loginuser WHERE user_name = ?', [email], (err, results) => {
-        if (err) {
-            console.error(err);
-            return res.redirect("/sec-code?error=An%20error%20occurred");
-        }
+                    const prices = {};
+                    cryptos.forEach(crypto => {
+                        if (response.data[crypto.toLowerCase()]) {
+                            prices[crypto] = response.data[crypto.toLowerCase()][CURRENCY];
+                        } else {
+                            console.log(`Error: Price for ${crypto} not found.`);
+                            prices[crypto] = null;
+                        }
+                    });
+                    return prices;
+                } catch (error) {
+                    console.error('Error fetching crypto prices:', error.message);
+                    return null;
+                }
+            };
 
-        if (results.length > 0) {
-            const storedCode = results[0].sec_code;
+            const currentPrices = await fetchCryptoPrice();
 
-            if (enteredCode === storedCode) {
-                res.redirect('/reset-password?email=' + email);
+            if (currentPrices) {
+                console.log('Current prices:', currentPrices);
+                const sendEmail = async (crypto, price, changePercent) => {
+                    const mailOptions = {
+                        from: 'shreyanayakb26@gmail.com',
+                        to: email,
+                        subject: `Crypto Alert: ${crypto.toUpperCase()} Price Changed`,
+                        text: `The price of ${crypto.toUpperCase()} has changed by ${changePercent.toFixed(2)}% and is now ${price} ${CURRENCY}.`,
+                    };
+
+                    try {
+                        await transporter.sendMail(mailOptions);
+                        console.log('Email sent successfully to:', email);
+                    } catch (error) {
+                        console.error('Error sending email:', error.message);
+                    }
+                };
+
+                for (const crypto of cryptos) {
+                    const currentPrice = currentPrices[crypto];
+                    if (currentPrice !== null) {
+                        console.log(`Current price of ${crypto}: ${currentPrice} ${CURRENCY}`);
+                        connection.query("SELECT last_price FROM crypto_prices WHERE user_id = ?", [user.user_id], async (err, results) => {
+                            if (err) {
+                                console.error("Error fetching last price for user:", user.user_id);
+                                return;
+                            }
+
+                            let lastPrice = results.length > 0 ? results[0].last_price : null;
+
+                            if (lastPrice !== null) {
+                                const changePercent = ((currentPrice - lastPrice) / lastPrice) * 100;
+                                console.log(`Price change: ${changePercent.toFixed(2)}%`);
+
+                                if (Math.abs(changePercent) >= threshold) {
+                                    console.log('Threshold reached. Sending email...');
+                                    await sendEmail(crypto, currentPrice, changePercent);
+                                }
+                            }
+                            connection.query("INSERT INTO crypto_prices (user_id, crypto, last_price) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE last_price = ?", [user.user_id, crypto, currentPrice, currentPrice], (err) => {
+                                if (err) console.error('Error updating last price in database:', err);
+                            });
+                        });
+                    } else {
+                        console.log(`Unable to fetch the current price for ${crypto}.`);
+                    }
+                }
             } else {
-                res.redirect('/sec-code?error=Invalid%20security%20code');
+                console.log('Unable to fetch cryptocurrency prices.');
             }
-        } else {
-            res.redirect("/sec-code?error=Email%20not%20found");
         }
     });
 });
-
-app.get('/reset-password', (req, res) => {
-    const email = req.query.email;
-    res.sendFile(__dirname + '/reset-password.html');
-});
-
-app.post('/reset-password', encoder, (req, res) => {
-    const newPassword = req.body.password;
-    const email = req.body.email;
-
-    bcrypt.hash(newPassword, 10, function (err, hashedPassword) {
-        if (err) throw err;
-        connection.query("UPDATE loginuser SET user_pass = ? WHERE user_name = ?", [hashedPassword, email], function (error, results) {
-            if (error) {
-                res.redirect("/reset-password?error=Error%20while%20resetting%20password");
-            } else {
-                res.redirect("/reset-password?success=Password%20reset%20successfully");
-            }
-        });
-    });
-});
-
-app.get("/logout", function (req, res) {
-    req.session.destroy((err) => {
-        if (err) {
-            console.log(err);
-            res.send("Error logging out.");
-        } else {
-            res.redirect("/"); 
-        }
-    });
-});
-
 app.listen(4500, function () {
     console.log('Server is running on port 4500');
 });

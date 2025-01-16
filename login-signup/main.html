@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Alert</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .navbar {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+        }
+        .navbar h1 {
+            font-size: 30px;
+            color: white;
+            font-weight: 700;
+        }
+        .navbar .nav-item {
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+        }
+        .hero {
+            height: 80vh;
+            background: linear-gradient(to bottom right, #6a11cb, #2575fc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+        .hero h2 {
+            color: white;
+            font-size: 3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            animation: slideInUp 1s ease-out forwards;
+        }
+        .hero p {
+            color: white;
+            font-size: 1.25rem;
+            margin-bottom: 30px;
+            animation: fadeIn 1.5s forwards;
+        }
+        .btn-login {
+            padding: 12px 30px;
+            background-color: #2575fc;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 25px;
+            transition: background-color 0.3s ease;
+            animation: fadeIn 2s forwards;
+        }
+        .btn-login:hover {
+            background-color: #6a11cb;
+        }
+        footer {
+            background-color: #2575fc;
+            color: white;
+            text-align: center;
+            padding: 25px 20px;
+            font-size: 14px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            animation: fadeIn 2.5s forwards;
+        }
+        footer .contact-info {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        footer .contact-info a {
+            color: white;
+            text-decoration: none;
+        }
+        footer .contact-info a:hover {
+            text-decoration: underline;
+            color: #ff6ec7;
+        }
+    
+        /* Animation for floating coins and symbols */
+        .floating-symbol {
+            position: absolute;
+            animation: floatSymbols 15s linear infinite;
+            color: #c3a1ff;
+            font-size: 3rem;
+            opacity: 0.2; /* Further reduced opacity */
+        }
+    
+        @keyframes floatSymbols {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-300px) rotate(360deg);
+            }
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+        }
+    
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+    
+        @keyframes slideInUp {
+            0% {
+                transform: translateY(50px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+    </style>    
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar p-4">
+        <div class="flex justify-between items-center max-w-6xl mx-auto">
+            <h1>CryptoAlert</h1>
+            <div>
+                <span class="nav-item mr-6 cursor-pointer">Home</span>
+                <span class="nav-item cursor-pointer">Contact</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div>
+            <h2>Stay Ahead with Crypto Alerts</h2>
+            <p>Get real-time updates on cryptocurrency prices and never miss an opportunity!</p>
+            <a href="/index"><button class="btn-login">Login to Get Started</button></a>
+        </div>
+
+        <!-- Floating Coins and Symbols -->
+        <div class="floating-symbol" style="top: 10%; left: 5%;">&#128181;</div> <!-- Dollar symbol -->
+        <div class="floating-symbol" style="top: 25%; left: 30%;">&#x20BF;</div> <!-- Peso symbol -->
+        <div class="floating-symbol" style="top: 40%; left: 60%;">&#x1F4B8;</div> <!-- Money with wings symbol -->
+        <div class="floating-symbol" style="top: 55%; left: 10%;">&#128179;</div> <!-- Coin symbol -->
+        <div class="floating-symbol" style="top: 30%; left: 75%;">&#128181;</div> <!-- Dollar symbol -->
+        <div class="floating-symbol" style="top: 50%; left: 15%;">&#x20BF;</div> <!-- Peso symbol -->
+        <div class="floating-symbol" style="top: 70%; left: 40%;">&#128179;</div> <!-- Coin symbol -->
+        <div class="floating-symbol" style="top: 60%; left: 80%;">&#x1F4B8;</div> <!-- Money with wings symbol -->
+        <div class="floating-symbol" style="top: 10%; left: 90%;">&#128181;</div> <!-- Dollar symbol -->
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 CryptoAlert. All rights reserved.</p>
+        <div class="contact-info">
+            <p>Contact Us:</p>
+            <p>Phone: <a href="tel:+918904002112">+91 89040 02112</a></p>
+            <p>Email: <a href="mailto:shreyanayakb26@gmail.com">shreyanayakb26@gmail.com</a></p>
+        </div>
+    </footer>
+</body>
+</html>

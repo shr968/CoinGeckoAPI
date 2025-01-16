@@ -4,21 +4,23 @@
     box-sizing: border-box;
     font-family: 'Arial', sans-serif;
 }
+
 body {
     background: linear-gradient(to right, #6a11cb, #2575fc);
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden; 
+    overflow: hidden;
 }
+
 .box {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
-    max-width: 450px;
-    height: 700px;
+    max-width: 600px; /* Adjusted width */
+    min-height: 500px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 40px;
@@ -27,12 +29,14 @@ body {
     flex-direction: column;
     position: relative;
 }
+
 .design {
     position: absolute;
     top: 20px;
     left: 20px;
     z-index: -1;
 }
+
 .design div {
     width: 15px;
     height: 15px;
@@ -41,6 +45,7 @@ body {
     border-radius: 50%;
     animation: animate 2.5s infinite ease-in-out;
 }
+
 @keyframes animate {
     0% {
         transform: scale(1);
@@ -53,12 +58,14 @@ body {
         transform: scale(1);
     }
 }
+
 .form {
     width: 100%;
     padding: 20px;
     text-align: center;
     color: #fff;
 }
+
 h2 {
     font-size: 28px;
     font-weight: 700;
@@ -67,10 +74,16 @@ h2 {
     text-transform: uppercase;
     letter-spacing: 2px;
 }
+
+.input-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
 .input-field {
-    width: 100%;
+    width: 48%; /* Adjusted width for two inputs per row */
     padding: 15px;
-    margin: 18px 0;
     background: #fff;
     border: none;
     border-radius: 10px;
@@ -79,11 +92,13 @@ h2 {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
 }
+
 .input-field:focus {
     outline: none;
     box-shadow: 0 0 10px #ff6ec7;
     border: 2px solid #ff6ec7;
 }
+
 .btn {
     width: 100%;
     padding: 16px;
@@ -97,10 +112,12 @@ h2 {
     transition: all 0.3s ease;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
 }
+
 .btn:hover {
     background: linear-gradient(to right, #ff7a5c, #ff6ec7);
     transform: scale(1.05);
 }
+
 .forgot-link {
     display: inline-block;
     margin-top: 15px;
@@ -109,14 +126,16 @@ h2 {
     font-size: 14px;
     text-transform: uppercase;
 }
+
 .forgot-link:hover {
     text-decoration: underline;
     color: #ff6ec7;
 }
+
 @media (max-width: 480px) {
     .box {
-        height: 700px;
         padding: 25px;
+        min-height: 400px;
     }
 
     h2 {
@@ -129,5 +148,14 @@ h2 {
 
     .btn {
         font-size: 18px;
+    }
+
+    .input-row {
+        flex-direction: column;
+    }
+
+    .input-field {
+        width: 100%;
+        margin-bottom: 10px;
     }
 }
