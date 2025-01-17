@@ -99,30 +99,54 @@ app.post('/signup', encoder, function (req, res) {
     const changePercent = parseFloat(req.body.change_percent);
 
     if (password === confirmPassword) {
-        connection.query("SELECT * FROM loginuser WHERE user_name = ?", [username], function (error, results) {
-            if (results.length > 0) {
-                res.redirect("/signup?error=User%20already%20exists,%20please%20login");
-            } else {
+        // Query to check if username, password, or sec_code already exists
+        connection.query(
+            "SELECT * FROM loginuser WHERE user_name = ? OR sec_code = ? OR user_pass = ?",
+            [username, code, password],
+            function (error, results) {
+                if (error) {
+                    console.error("Error checking existing records:", error.message);
+                    return res.redirect("/signup?error=Internal%20server%20error");
+                }
+
+                // Check if username, sec_code, or password is already used
+                if (results.length > 0) {
+                    const duplicateFields = results.map(row => {
+                        if (row.user_name === username) return "email";
+                        if (row.sec_code === code) return "security code";
+                        if (row.user_pass === password) return "password";
+                    });
+                    const message = `The ${duplicateFields.join(", ")} you entered is already in use.`;
+                    return res.redirect(`/signup?error=${encodeURIComponent(message)}`);
+                }
+
+                // Hash the password if it is unique
                 bcrypt.hash(password, 10, function (err, hashedPassword) {
-                    if (err) throw err;
+                    if (err) {
+                        console.error("Error hashing password:", err.message);
+                        return res.redirect("/signup?error=Internal%20server%20error%20while%20hashing%20password");
+                    }
+
+                    // Insert user into the database
                     connection.query(
                         "INSERT INTO loginuser (user_name, user_pass, sec_code, cryptos, change_percent) VALUES (?, ?, ?, ?, ?)",
                         [username, hashedPassword, code, cryptos, changePercent],
                         function (error, results) {
                             if (error) {
-                                res.redirect("/signup?error=Error%20while%20signing%20up");
-                            } else {
-                                res.redirect("/index");
+                                console.error("Error inserting user into the database:", error.message);
+                                return res.redirect("/signup?error=Error%20while%20signing%20up");
                             }
+                            res.redirect("/index?success=Account%20created%20successfully");
                         }
                     );
                 });
             }
-        });
+        );
     } else {
         res.redirect("/signup?error=Passwords%20do%20not%20match");
     }
 });
+
 
 cron.schedule('0 0 */3 * *', async () => {
     console.log('Cron job executed at: ' + new Date().toLocaleString());
