@@ -112,7 +112,7 @@ app.post('/signup', encoder, function (req, res) {
                             if (error) {
                                 res.redirect("/signup?error=Error%20while%20signing%20up");
                             } else {
-                                res.redirect("/");
+                                res.redirect("/index");
                             }
                         }
                     );
