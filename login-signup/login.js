@@ -124,7 +124,7 @@ app.post('/signup', encoder, function (req, res) {
     }
 });
 
-cron.schedule('*/1 * * * *', async () => {
+cron.schedule('0 0 */3 * *', async () => {
     console.log('Cron job executed at: ' + new Date().toLocaleString());
 
     connection.query("SELECT * FROM loginuser", async (error, users) => {
